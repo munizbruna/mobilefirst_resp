@@ -89,6 +89,9 @@ img {
 @media (min-width: 768px) {
     
     /* --- Adaptação do Menu (Tablet/Desktop) --- */
+    .navbar{
+        margin: 0;
+    }
     
     .menu-toggle {
         /* 1. Esconde o botão hamburger */
@@ -143,8 +146,8 @@ img {
     /* Em telas muito grandes, podemos centralizar o conteúdo */
     .navbar,
     .content {
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
+        margin: 0;
+        padding: 20px 40px;
     }
-}
+    
+    }
