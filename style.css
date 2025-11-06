@@ -1,0 +1,150 @@
+/* --- Reset Básico e Fontes --- */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    line-height: 1.6;
+}
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+/* --- Estilos do Header (Mobile) --- */
+.navbar {
+    display: flex;
+    justify-content: space-between; /* Logo de um lado, menu do outro */
+    align-items: center;
+    padding: 1rem;
+    background-color: #333;
+    color: white;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* --- O Menu (Mobile) --- */
+.menu-toggle {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    /* (Será escondido em telas maiores) */
+}
+
+.nav-menu {
+    /* Escondido por padrão no celular */
+    display: none; 
+    
+    /* Quando 'aberto' (via JS), ele deve aparecer */
+    position: absolute;
+    top: 60px; /* Altura do navbar */
+    left: 0;
+    width: 100%;
+    background-color: #444;
+}
+
+/* Classe que será ligada/desligada via JavaScript */
+.nav-menu.active {
+    display: block;
+}
+
+.nav-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-menu li a {
+    display: block;
+    padding: 1rem;
+    text-align: center;
+    color: white;
+    text-decoration: none;
+}
+.nav-menu li a:hover {
+    background-color: #555;
+}
+
+
+/* --- Conteúdo Principal (Mobile) --- */
+.content {
+    padding: 1rem;
+}
+
+.welcome {
+    text-align: center;
+}
+
+.welcome img {
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
+
+/* --- Breakpoint 1: Tablets (ex: 768px) --- */
+
+@media (min-width: 768px) {
+    
+    /* --- Adaptação do Menu (Tablet/Desktop) --- */
+    
+    .menu-toggle {
+        /* 1. Esconde o botão hamburger */
+        display: none; 
+    }
+
+    .nav-menu {
+        /* 2. Mostra o menu de navegação */
+        display: block; 
+        
+        /* 3. Remove o posicionamento absoluto */
+        position: static; 
+        width: auto;
+        background-color: transparent;
+    }
+    
+    .nav-menu.active {
+        /* Desativa o 'display: block' da classe 'active' */
+        display: block; 
+    }
+
+    .nav-menu ul {
+        /* 4. Coloca os links lado a lado */
+        display: flex; 
+    }
+
+    .nav-menu li a {
+        padding: 0 1rem; /* Ajusta o espaçamento horizontal */
+    }
+    
+    .nav-menu li a:hover {
+        background-color: transparent;
+        color: #ccc; /* Efeito hover mais sutil */
+    }
+
+    /* --- Adaptação do Conteúdo (Tablet) --- */
+    
+    .welcome {
+        /* Organiza imagem e texto lado a lado */
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
+        gap: 2rem;
+        align-items: center;
+        text-align: left;
+    }
+}
+
+
+/* --- Breakpoint 2: Desktops (Opcional) (ex: 1024px) --- */
+
+@media (min-width: 1024px) {
+    /* Em telas muito grandes, podemos centralizar o conteúdo */
+    .navbar,
+    .content {
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
