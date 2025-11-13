@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulário de Registro (Mobile First)</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* 3. CSS Reset e Variáveis */
+      :root {
+        --primary-color: #4f46e5; /* Um azul/índigo forte */
+        --dark-color: #374151; /* Cinza escuro para o botão */
+        --light-gray: #f3f4f6; /* Cinza para o fundo do alerta */
+        --text-gray: #6b7280; /* Cinza para textos secundários */
+        --border-gray: #d1d5db; /* Cinza para bordas */
+        --white: #ffffff;
+        --page-bg: #eef5ff; /* Fundo da página em desktop */
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      /* 4. Base (Mobile First) - O layout ocupa a tela inteira */
+      body {
+        background-color: var(--white); /* Fundo branco no mobile */
+      }
+
+      .margin-container {
+        /* No mobile, o padding dá o respiro */
+        padding: 0 40px;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 24px;
+        flex-wrap: wrap;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark-color);
+      }
+
+      .logo i {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.3rem;
+        color: var(--text-gray);
+        cursor: pointer;
+      }
+
+      .progress-stepper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        order: 1;
+        margin: 32px 0;
+      }
+
+      .step {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--border-gray);
+      }
+
+      .step.active {
+        background-color: var(--primary-color);
+      }
+
+      .card-body h1 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 8px;
+      }
+
+      .card-body .subtitle {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+        line-height: 1.5;
+        margin-bottom: 24px;
+      }
+
+      .alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        background-color: var(--light-gray);
+        padding: 32px;
+        margin-bottom: 24px;
+        width: 100%;
+      }
+
+      .alert i.fa-lock {
+        color: var(--text-gray);
+        margin-top: 3px;
+      }
+
+      .alert p {
+        font-size: 0.8rem;
+        color: var(--dark-color);
+        flex: 1; /* Ocupa o espaço disponível */
+      }
+
+      .alert .alert-close {
+        background: none;
+        border: none;
+        font-size: 1rem;
+        color: var(--text-gray);
+        cursor: pointer;
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+        border: none;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--dark-color);
+        margin-bottom: 8px;
+      }
+
+      .input-group {
+        display: flex;
+        align-items: center;
+        overflow: hidden; /* Para manter o border-radius */
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .country-code {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        cursor: pointer;
+        font-weight: 500;
+        border-bottom: 1px solid var(--border-gray);
+
+      }
+      #phone{
+        border-bottom: 1px solid var(--border-gray);
+        width:75%;
+      }
+
+      .country-code i {
+        color: var(--text-gray);
+        font-size: 0.8rem;
+      }
+
+      .input-group input[type="tel"] {
+        border: none;
+        padding: 12px 16px;
+        font-size: 1rem;
+        outline: none; /* Remove a borda ao focar */
+      }
+
+      .submit-btn {
+        width: 30%;
+        padding: 16px;
+        background-color: transparent;
+        color: --dark-color;
+        border: 1px solid var(--dark-color);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .submit-btn:hover {
+        background-color: #2b313a;
+      }
+      .line-height{
+        width: 40px;
+        height: 2px;
+        background-color: var(--border-gray);
+      }
+
+      /* 5. Desktop (Media Query) - O layout vira um "card" */
+      @media (min-width: 768px) {
+        .container {
+          padding: 28px;
+        }
+        .card-body {
+          /* Vira um card centrado */
+          max-width: 480px; /* Largura do card */
+          margin: 4rem auto; /* Centraliza verticalmente e horizontalmente */
+          background-color: var(--white);
+          border-radius: 16px;
+          padding: 32px; /* Aumenta o padding no desktop */
+        }
+        .card-body>*{
+          padding-left: 0;
+          padding-right: 0;
+        }
+
+        .step {
+          width: 18px;
+          height: 18px;
+        }
+        .submit-btn{
+          width: auto;
+          margin: 0;
+        }
+        .alert{
+          padding: 16px;
+        }
+        .form-group {
+          border: 1px solid var(--border-gray);
+          padding: 32px;
+          border-radius: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <header class="card-header margin-container">
+        <div class="logo">
+          <i class="fa-solid fa-c"></i>
+          <span>COMPANY NAME</span>
+        </div>
+
+        <div class="progress-stepper">
+          <span class="step active"></span>
+          <span class="line-height"></span>
+          <span class="step"></span>
+          <span class="line-height"></span>
+          <span class="step"></span>
+        </div>
+        <button class="close-btn" aria-label="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+
+      <section class="card-body">
+        <h1 class="margin-container">Registration</h1>
+        <p class="subtitle margin-container">
+          Fill in the registration data. It will take a couple of minutes. All
+          you need is a phone number and e-mail.
+        </p>
+
+        <div class="alert">
+          <i class="fa-solid fa-lock"></i>
+          <p>
+            We take privacy issues seriously. You can be sure that your personal
+            data is securely protected.
+          </p>
+          <button class="alert-close" aria-label="Fechar alerta">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form class="margin-container" action="#">
+          <fieldset class="form-group">
+            <label for="phone">Enter your phone number</label>
+            <div class="input-group">
+              <div class="country-code">
+                <span>+1</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <input type="tel" id="phone" placeholder="555-555-1234" />
+            </div>
+          </fieldset>
+
+          <button type="submit" class="submit-btn">Send Code</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

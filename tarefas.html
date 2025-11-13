@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="pt-BR">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Tarefas</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    *, *::before, *::after {
+      box-sizing: inherit;
+    }
+
+    .container {
+      min-height: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px 0;
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 16px;
+      opacity: 0.7;
+      font-weight: 400;
+    }
+
+    .input-section {
+      margin-bottom: 24px;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    #taskInput {
+      flex: 1;
+      padding: 14px 16px;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    #taskInput:focus {
+      border-color: currentColor;
+      transform: translateY(-1px);
+    }
+
+    #addButton {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    #addButton:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    #addButton:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    #addButton:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .tasks-container {
+      flex: 1;
+    }
+
+    .task-item {
+      padding: 16px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .task-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .task-checkbox {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .task-checkbox.checked {
+      background: currentColor;
+    }
+
+    .task-checkbox.checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      word-break: break-word;
+    }
+
+    .task-text.completed {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+
+    .delete-button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+
+    .delete-button:hover {
+      transform: scale(1.05);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      opacity: 0.5;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state-text {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .stats {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      .subtitle {
+        font-size: 18px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container">
+   <header>
+    <h1 id="appTitle">Minhas Tarefas</h1>
+    <p class="subtitle" id="subtitle">Organize seu dia</p>
+   </header>
+   <div class="input-section">
+    <div class="input-wrapper"><input type="text" id="taskInput" placeholder="Nova tarefa..." aria-label="Campo de nova tarefa"> <button id="addButton" aria-label="Adicionar tarefa">Adicionar</button>
+    </div>
+   </div>
+   <main class="tasks-container" role="main">
+    <div id="tasksList"></div>
+    <div class="stats" id="stats"></div>
+   </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    const defaultConfig = {
+      background_color: '#f0f4f8',
+      surface_color: '#ffffff',
+      text_color: '#1a202c',
+      primary_action_color: '#4299e1',
+      secondary_action_color: '#fc8181',
+      app_title: 'Minhas Tarefas',
+      subtitle: 'Organize seu dia',
+      add_button_text: 'Adicionar',
+      input_placeholder: 'Nova tarefa...',
+      font_family: 'Inter',
+      font_size: 16
+    };
+
+    let tasks = [];
+    let isInitialized = false;
+
+    const dataHandler = {
+      onDataChanged(data) {
+        tasks = data;
+        renderTasks();
+      }
+    };
+
+    async function initializeApp() {
+      if (window.dataSdk) {
+        const initResult = await window.dataSdk.init(dataHandler);
+        if (!initResult.isOk) {
+          showToast('Erro ao inicializar o app');
+          return;
+        }
+      }
+
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            applyConfig(config);
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.background_color || defaultConfig.background_color,
+                set: (value) => {
+                  config.background_color = value;
+                  window.elementSdk.setConfig({ background_color: value });
+                }
+              },
+              {
+                get: () => config.surface_color || defaultConfig.surface_color,
+                set: (value) => {
+                  config.surface_color = value;
+                  window.elementSdk.setConfig({ surface_color: value });
+                }
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => {
+                  config.text_color = value;
+                  window.elementSdk.setConfig({ text_color: value });
+                }
+              },
+              {
+                get: () => config.primary_action_color || defaultConfig.primary_action_color,
+                set: (value) => {
+                  config.primary_action_color = value;
+                  window.elementSdk.setConfig({ primary_action_color: value });
+                }
+              },
+              {
+                get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+                set: (value) => {
+                  config.secondary_action_color = value;
+                  window.elementSdk.setConfig({ secondary_action_color: value });
+                }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => config.font_family || defaultConfig.font_family,
+              set: (value) => {
+                config.font_family = value;
+                window.elementSdk.setConfig({ font_family: value });
+              }
+            },
+            fontSizeable: {
+              get: () => config.font_size || defaultConfig.font_size,
+              set: (value) => {
+                config.font_size = value;
+                window.elementSdk.setConfig({ font_size: value });
+              }
+            }
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ['app_title', config.app_title || defaultConfig.app_title],
+            ['subtitle', config.subtitle || defaultConfig.subtitle],
+            ['add_button_text', config.add_button_text || defaultConfig.add_button_text],
+            ['input_placeholder', config.input_placeholder || defaultConfig.input_placeholder]
+          ])
+        });
+      }
+
+      applyConfig(window.elementSdk?.config || defaultConfig);
+      isInitialized = true;
+    }
+
+    function applyConfig(config) {
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const fontSize = config.font_size || defaultConfig.font_size;
+
+      document.body.style.backgroundColor = bgColor;
+      document.body.style.color = textColor;
+      document.body.style.fontFamily = `${fontFamily}, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+
+      document.getElementById('appTitle').textContent = config.app_title || defaultConfig.app_title;
+      document.getElementById('appTitle').style.fontSize = `${fontSize * 2}px`;
+      document.getElementById('appTitle').style.color = textColor;
+
+      document.getElementById('subtitle').textContent = config.subtitle || defaultConfig.subtitle;
+      document.getElementById('subtitle').style.fontSize = `${fontSize}px`;
+      document.getElementById('subtitle').style.color = textColor;
+
+      const inputSection = document.querySelector('.input-section');
+      inputSection.style.backgroundColor = surfaceColor;
+
+      const taskInput = document.getElementById('taskInput');
+      taskInput.placeholder = config.input_placeholder || defaultConfig.input_placeholder;
+      taskInput.style.backgroundColor = bgColor;
+      taskInput.style.color = textColor;
+      taskInput.style.fontSize = `${fontSize}px`;
+
+      const addButton = document.getElementById('addButton');
+      addButton.textContent = config.add_button_text || defaultConfig.add_button_text;
+      addButton.style.backgroundColor = primaryColor;
+      addButton.style.color = surfaceColor;
+      addButton.style.fontSize = `${fontSize}px`;
+
+      const stats = document.getElementById('stats');
+      stats.style.backgroundColor = surfaceColor;
+      stats.style.color = textColor;
+      stats.style.fontSize = `${fontSize * 0.875}px`;
+
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const tasksList = document.getElementById('tasksList');
+      const config = window.elementSdk?.config || defaultConfig;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const fontSize = config.font_size || defaultConfig.font_size;
+
+      if (tasks.length === 0) {
+        tasksList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <p class="empty-state-text" style="color: ${textColor}; font-size: ${fontSize * 1.125}px;">Nenhuma tarefa ainda</p>
+          </div>
+        `;
+        updateStats();
+        return;
+      }
+
+      const existingTasks = new Map(
+        [...tasksList.children].map(el => [el.dataset.taskId, el])
+      );
+
+      tasks.forEach(task => {
+        if (existingTasks.has(task.__backendId)) {
+          const taskElement = existingTasks.get(task.__backendId);
+          updateTaskElement(taskElement, task, config);
+          existingTasks.delete(task.__backendId);
+        } else {
+          tasksList.appendChild(createTaskElement(task, config));
+        }
+      });
+
+      existingTasks.forEach(el => el.remove());
+      updateStats();
+    }
+
+    function createTaskElement(task, config) {
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const fontSize = config.font_size || defaultConfig.font_size;
+
+      const taskItem = document.createElement('div');
+      taskItem.className = 'task-item';
+      taskItem.dataset.taskId = task.__backendId;
+      taskItem.style.backgroundColor = surfaceColor;
+      taskItem.style.color = textColor;
+
+      const checkbox = document.createElement('div');
+      checkbox.className = `task-checkbox ${task.completed ? 'checked' : ''}`;
+      checkbox.style.borderColor = primaryColor;
+      checkbox.style.color = surfaceColor;
+      if (task.completed) {
+        checkbox.style.backgroundColor = primaryColor;
+      }
+      checkbox.setAttribute('role', 'checkbox');
+      checkbox.setAttribute('aria-checked', task.completed);
+      checkbox.setAttribute('tabindex', '0');
+      checkbox.onclick = () => toggleTask(task);
+
+      const taskText = document.createElement('span');
+      taskText.className = `task-text ${task.completed ? 'completed' : ''}`;
+      taskText.textContent = task.text;
+      taskText.style.fontSize = `${fontSize}px`;
+
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'delete-button';
+      deleteButton.textContent = 'Excluir';
+      deleteButton.style.backgroundColor = secondaryColor;
+      deleteButton.style.color = surfaceColor;
+      deleteButton.style.fontSize = `${fontSize * 0.875}px`;
+      deleteButton.setAttribute('aria-label', `Excluir tarefa ${task.text}`);
+      deleteButton.onclick = () => deleteTask(task);
+
+      taskItem.appendChild(checkbox);
+      taskItem.appendChild(taskText);
+      taskItem.appendChild(deleteButton);
+
+      return taskItem;
+    }
+
+    function updateTaskElement(element, task, config) {
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const fontSize = config.font_size || defaultConfig.font_size;
+
+      element.style.backgroundColor = surfaceColor;
+      element.style.color = textColor;
+
+      const checkbox = element.querySelector('.task-checkbox');
+      checkbox.className = `task-checkbox ${task.completed ? 'checked' : ''}`;
+      checkbox.style.borderColor = primaryColor;
+      checkbox.style.color = surfaceColor;
+      checkbox.style.backgroundColor = task.completed ? primaryColor : 'transparent';
+      checkbox.setAttribute('aria-checked', task.completed);
+
+      const taskText = element.querySelector('.task-text');
+      taskText.className = `task-text ${task.completed ? 'completed' : ''}`;
+      taskText.textContent = task.text;
+      taskText.style.fontSize = `${fontSize}px`;
+
+      const deleteButton = element.querySelector('.delete-button');
+      deleteButton.style.backgroundColor = secondaryColor;
+      deleteButton.style.color = surfaceColor;
+      deleteButton.style.fontSize = `${fontSize * 0.875}px`;
+    }
+
+    async function addTask() {
+      const input = document.getElementById('taskInput');
+      const text = input.value.trim();
+
+      if (!text) return;
+
+      if (tasks.length >= 999) {
+        showToast('Limite de 999 tarefas atingido');
+        return;
+      }
+
+      const addButton = document.getElementById('addButton');
+      const originalText = addButton.textContent;
+      addButton.disabled = true;
+      addButton.innerHTML = '<span class="loading-spinner"></span>';
+
+      const newTask = {
+        id: Date.now().toString(),
+        text: text,
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+
+      if (window.dataSdk) {
+        const result = await window.dataSdk.create(newTask);
+        if (result.isOk) {
+          input.value = '';
+          showToast('Tarefa adicionada!');
+        } else {
+          showToast('Erro ao adicionar tarefa');
+        }
+      }
+
+      addButton.disabled = false;
+      addButton.textContent = originalText;
+    }
+
+    async function toggleTask(task) {
+      const updatedTask = { ...task, completed: !task.completed };
+      
+      if (window.dataSdk) {
+        const result = await window.dataSdk.update(updatedTask);
+        if (!result.isOk) {
+          showToast('Erro ao atualizar tarefa');
+        }
+      }
+    }
+
+    async function deleteTask(task) {
+      if (window.dataSdk) {
+        const result = await window.dataSdk.delete(task);
+        if (result.isOk) {
+          showToast('Tarefa excluída');
+        } else {
+          showToast('Erro ao excluir tarefa');
+        }
+      }
+    }
+
+    function updateStats() {
+      const stats = document.getElementById('stats');
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.completed).length;
+      const pending = total - completed;
+
+      if (total === 0) {
+        stats.textContent = '';
+        return;
+      }
+
+      stats.textContent = `${total} ${total === 1 ? 'tarefa' : 'tarefas'} • ${completed} ${completed === 1 ? 'concluída' : 'concluídas'} • ${pending} ${pending === 1 ? 'pendente' : 'pendentes'}`;
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const config = window.elementSdk?.config || defaultConfig;
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+
+      toast.textContent = message;
+      toast.style.backgroundColor = primaryColor;
+      toast.style.color = surfaceColor;
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    document.getElementById('addButton').addEventListener('click', addTask);
+    document.getElementById('taskInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        addTask();
+      }
+    });
+
+    initializeApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a4e3557354f1f2',t:'MTc2MjQzNTIyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
